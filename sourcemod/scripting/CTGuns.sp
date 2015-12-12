@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.25"
+#define PLUGIN_VERSION "1.26"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -57,7 +57,7 @@ enum SnipersSubMenu
 }
 
 /* GLOBALS */
-Handle g_RoundTimer;
+Handle g_RoundTimer = INVALID_HANDLE;
 bool g_Enabled = true;
 
 char g_PrimaryWeapon[MAXPLAYERS + 1][512];
