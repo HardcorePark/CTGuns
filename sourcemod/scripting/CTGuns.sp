@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.21"
+#define PLUGIN_VERSION "1.22"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -78,7 +78,7 @@ public OnPluginStart()
 
 public Action advertisement(Handle timer)
 {
-	PrintToChatAll("%s Type \x07!guns \x01to select your gun loadouts!", PLUGIN_PREFIX);
+	PrintToChatAll("%s Type \x07!ctguns \x01to select your gun loadouts!", PLUGIN_PREFIX);
 }
 
 public Action Event_Start(Handle event, char[] name, bool dontBroadcast)
