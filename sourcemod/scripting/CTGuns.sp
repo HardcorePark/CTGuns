@@ -85,9 +85,16 @@ public Action Event_End(Handle event, char[] name, bool dontBroadcast)
 	
 	if (g_RoundTimer != INVALID_HANDLE)
 	{
-		CloseHandle(g_RoundTimer);
-		g_RoundTimer = INVALID_HANDLE;
+		if(CloseHandle(g_RoundTimer))
+		{
+			g_RoundTimer = INVALID_HANDLE;
+		}
 	}	
+}
+
+public Action Timer_Round(Handle timer)
+{
+	g_Enabled = false;
 }
 
 public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
@@ -125,12 +132,8 @@ public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
 		}	
 	}	
 }
-	
-public Action Timer_Round(Handle timer)
-{
-	g_Enabled = false;
-}
 
+	
 public Action Command_guns(client, args)
 {	
 	if (!IsPlayerAlive(client))
