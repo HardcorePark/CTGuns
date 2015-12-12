@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.06"
+#define PLUGIN_VERSION "1.21"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -15,6 +15,7 @@ public Plugin myinfo =
 	url = "www.tangoworldwide.net",
 };
 
+/*ENUMS*/
 enum MainSubMenu
 {
 	pistols,
@@ -24,7 +25,6 @@ enum MainSubMenu
 	shotguns,
 	mgs,
 };
-
 enum PistolsSubMenu
 {
 	deagle,
@@ -38,7 +38,6 @@ enum PistolsSubMenu
 	dualberettas,
 	k8revolver,	
 };
-
 enum RiflesSubMenu
 {
 	ak47,
@@ -49,7 +48,15 @@ enum RiflesSubMenu
 	m4a1,
 	m4a4,
 }
+enum SnipersSubMenu
+{
+	awp,
+	g3sg1,
+	ssg08,
+	scar20,
+}
 
+/* GLOBALS */
 Handle g_RoundTimer;
 bool g_Enabled = true;
 
@@ -59,18 +66,19 @@ char g_SecondaryWeapon[MAXPLAYERS + 1][512];
 bool g_PickedPrimary[MAXPLAYERS + 1];
 bool g_PickedSecondary[MAXPLAYERS + 1];
 
+/* MAINS */
 public OnPluginStart()
 {
-	RegConsoleCmd("sm_guns", Command_guns);
 	HookEvent("round_start", Event_Start);
 	HookEvent("round_end", Event_End);
 	HookEvent("player_spawn", Event_Spawn);
+	RegConsoleCmd("sm_ctguns", Command_ctguns);
 	CreateTimer(120.0, advertisement, TIMER_REPEAT);
 }
 
 public Action advertisement(Handle timer)
 {
-	PrintToChatAll("%s If you wish to select your guns on CT. Write \x10!guns", PLUGIN_PREFIX);
+	PrintToChatAll("%s Type \x07!guns \x01to select your gun loadouts!", PLUGIN_PREFIX);
 }
 
 public Action Event_Start(Handle event, char[] name, bool dontBroadcast)
@@ -92,11 +100,6 @@ public Action Event_End(Handle event, char[] name, bool dontBroadcast)
 	}	
 }
 
-public Action Timer_Round(Handle timer)
-{
-	g_Enabled = false;
-}
-
 public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -114,7 +117,7 @@ public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
 			
 			GivePlayerItem(client, g_PrimaryWeapon[client], 0);
 		} else {
-			PrintToChat(client, "%s No Primary Picked! Use !guns", PLUGIN_PREFIX);
+			PrintToChat(client, "%s No Primary Picked! Use !ctguns", PLUGIN_PREFIX);
 		}
 		
 		if(g_PickedSecondary[client] == true)
@@ -128,13 +131,12 @@ public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
 			
 			GivePlayerItem(client, g_SecondaryWeapon[client], 0);		
 		} else {
-			PrintToChat(client, "%s No Secondary Picked! Use !guns", PLUGIN_PREFIX);
+			PrintToChat(client, "%s No Secondary Picked! Use !ctguns", PLUGIN_PREFIX);
 		}	
 	}	
 }
 
-	
-public Action Command_guns(client, args)
+public Action Command_ctguns(client, args)
 {	
 	if (!IsPlayerAlive(client))
 	{
@@ -153,16 +155,66 @@ public Action Command_guns(client, args)
 		PrintToChat(client, "%s You can only use this command for the first 30 seconds!", PLUGIN_PREFIX);
 		return Plugin_Handled;
 	}
-
-	Handle l_menu = CreateMenu(CTGunsMenuHandle, MENU_ACTIONS_ALL);
-	SetMenuTitle(l_menu, "Tango CT Guns");
-	AddMenuItem(l_menu, "0", "Pistols");
-	AddMenuItem(l_menu, "1", "Rifles");
-	DisplayMenu(l_menu, client, 0);
+	
+	MainMenu(client);
 	
 	return Plugin_Handled;
 }
 
+/* SUBS */
+public MainMenu(client)
+{
+	Handle l_menu = CreateMenu(CTGunsMenuHandle, MENU_ACTIONS_ALL);
+	SetMenuTitle(l_menu, "Tango CT Guns");
+	AddMenuItem(l_menu, "0", "Pistols");
+	AddMenuItem(l_menu, "1", "Rifles");
+	AddMenuItem(l_menu, "2", "Snipers");
+	DisplayMenu(l_menu, client, 0);
+}
+
+public PistolsMenu(client)
+{
+	Handle pistol_menu = CreateMenu(PistolsMenuHandle, MENU_ACTIONS_ALL);
+	SetMenuTitle(pistol_menu, "CT Guns - Pistols");
+	AddMenuItem(pistol_menu, "0", "Desert Eagle");
+	AddMenuItem(pistol_menu, "1", "CZ75-Auto");
+	AddMenuItem(pistol_menu, "2", "Tec-9");
+	AddMenuItem(pistol_menu, "3", "Five-SeveN");
+	AddMenuItem(pistol_menu, "4", "USP-S");
+	AddMenuItem(pistol_menu, "5", "Glock-18");
+	AddMenuItem(pistol_menu, "6", "P250");
+	AddMenuItem(pistol_menu, "7", "P2000");
+	AddMenuItem(pistol_menu, "8", "Dual Berettas");
+	AddMenuItem(pistol_menu, "9", "R8 Revolver");
+	DisplayMenu(pistol_menu, client, 0);
+}
+
+public RiflesMenu(client)
+{
+	Handle rifle_menu = CreateMenu(RiflesMenuHandle, MENU_ACTIONS_ALL);
+	SetMenuTitle(rifle_menu, "CT Guns - Rifles");
+	AddMenuItem(rifle_menu, "0", "AK-47");
+	AddMenuItem(rifle_menu, "1", "AUG");
+	AddMenuItem(rifle_menu, "2", "Famas");
+	AddMenuItem(rifle_menu, "3", "Galil");
+	AddMenuItem(rifle_menu, "4", "SG 553");
+	AddMenuItem(rifle_menu, "5", "M4a1 - Silenced");
+	AddMenuItem(rifle_menu, "6", "M4a4");
+	DisplayMenu(rifle_menu, client, 0);
+}
+
+public SnipersMenu(client)
+{
+	Handle snipers_menu = CreateMenu(SnipersMenuHandle, MENU_ACTIONS_ALL);
+	SetMenuTitle(snipers_menu, "CT Guns - Snipers");
+	AddMenuItem(snipers_menu, "0", "AWP");
+	AddMenuItem(snipers_menu, "1", "G3SG1");
+	AddMenuItem(snipers_menu, "2", "SSG 08");
+	AddMenuItem(snipers_menu, "3", "SCAR-20");
+	DisplayMenu(snipers_menu, client, 0);
+}
+
+/* MENU HANDLES */
 public CTGunsMenuHandle(Handle menu, MenuAction action, client, option)
 {
 	if(action == MenuAction_Select && IsValidPlayer(client))
@@ -183,25 +235,12 @@ public CTGunsMenuHandle(Handle menu, MenuAction action, client, option)
 			{
 				RiflesMenu(client);
 			}
+			case snipers:
+			{
+				SnipersMenu(client);
+			}
 		}	
 	}
-}
-
-public PistolsMenu(client)
-{
-	Handle pistol_menu = CreateMenu(PistolsMenuHandle, MENU_ACTIONS_ALL);
-	SetMenuTitle(pistol_menu, "CT Guns - Pistols");
-	AddMenuItem(pistol_menu, "0", "Desert Eagle");
-	AddMenuItem(pistol_menu, "1", "CZ75-Auto");
-	AddMenuItem(pistol_menu, "2", "Tec-9");
-	AddMenuItem(pistol_menu, "3", "Five-SeveN");
-	AddMenuItem(pistol_menu, "4", "USP-S");
-	AddMenuItem(pistol_menu, "5", "Glock-18");
-	AddMenuItem(pistol_menu, "6", "P250");
-	AddMenuItem(pistol_menu, "7", "P2000");
-	AddMenuItem(pistol_menu, "8", "Dual Berettas");
-	AddMenuItem(pistol_menu, "9", "R8 Revolver");
-	DisplayMenu(pistol_menu, client, 0);
 }
 
 public PistolsMenuHandle(Handle menu, MenuAction action, client, option)
@@ -310,20 +349,6 @@ public PistolsMenuHandle(Handle menu, MenuAction action, client, option)
 	}
 }
 
-public RiflesMenu(client)
-{
-	Handle rifle_menu = CreateMenu(RiflesMenuHandle, MENU_ACTIONS_ALL);
-	SetMenuTitle(rifle_menu, "CT Guns - Rifles");
-	AddMenuItem(rifle_menu, "0", "AK-47");
-	AddMenuItem(rifle_menu, "1", "AUG");
-	AddMenuItem(rifle_menu, "2", "Famas");
-	AddMenuItem(rifle_menu, "3", "Galil");
-	AddMenuItem(rifle_menu, "4", "SG 553");
-	AddMenuItem(rifle_menu, "5", "M4a1 - Silenced");
-	AddMenuItem(rifle_menu, "6", "M4a4");
-	DisplayMenu(rifle_menu, client, 0);
-}
-
 public RiflesMenuHandle(Handle menu, MenuAction action, client, option)
 {
 	if(action == MenuAction_Select && IsValidPlayer(client))
@@ -405,7 +430,72 @@ public RiflesMenuHandle(Handle menu, MenuAction action, client, option)
 		}
 	}
 }
-			
+
+public SnipersMenuHandle(Handle menu, MenuAction action, client, option)
+{
+	if(action == MenuAction_Select && IsValidPlayer(client))
+	{
+		char lOption[32];
+		if(!GetMenuItem(menu, option, lOption, sizeof(lOption)))
+		{
+			PrintToChat(client, "%s Invalid Option", PLUGIN_PREFIX);
+		}
+		
+		int weaponI = GetPlayerWeaponSlot(client, 0);
+		if (weaponI != -1)
+		{
+			RemovePlayerItem(client, weaponI);
+			RemoveEdict(weaponI);
+		}
+		
+		char weaponName[512];
+		g_PickedPrimary[client] = true;
+		
+		switch(SnipersSubMenu:StringToInt(lOption))
+		{
+			case awp:
+			{
+				PrintToChat(client, "%s You've been given a: \x07AWP", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_awp";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case g3sg1:
+			{
+				PrintToChat(client, "%s You've been given a: \x07G3SG1", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_g3sg1";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case ssg08:
+			{
+				PrintToChat(client, "%s You've been given a: \x07SSG 08", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_ssg08";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case scar20:
+			{
+				PrintToChat(client, "%s You've been given a: \x07SCAR-20", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_scar20";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+		}
+	}
+}
+
+/* TIMERS */
+public Action Timer_Round(Handle timer)
+{
+	g_Enabled = false;
+}
+
+/* FUNCTIONS */
 stock bool IsValidPlayer(int client, bool alive = false)
 {
    if(client >= 1 && client <= MaxClients && IsClientConnected(client) && IsClientInGame(client) && (alive == false || IsPlayerAlive(client)))
