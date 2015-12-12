@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.24"
+#define PLUGIN_VERSION "1.25"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -493,6 +493,7 @@ public SnipersMenuHandle(Handle menu, MenuAction action, client, option)
 public Action Timer_Round(Handle timer)
 {
 	g_Enabled = false;
+	g_RoundTimer = INVALID_HANDLE;
 }
 
 /* FUNCTIONS */
