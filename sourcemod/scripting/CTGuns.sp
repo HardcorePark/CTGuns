@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.22"
+#define PLUGIN_VERSION "1.23"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -84,7 +84,7 @@ public Action advertisement(Handle timer)
 public Action Event_Start(Handle event, char[] name, bool dontBroadcast)
 {
 	g_Enabled = true;
-	g_RoundTimer = CreateTimer(30.0, Timer_Round);
+	g_RoundTimer = CreateTimer(30.0, Timer_Round, _, TIMER_REPEAT);
 }
 
 public Action Event_End(Handle event, char[] name, bool dontBroadcast)
