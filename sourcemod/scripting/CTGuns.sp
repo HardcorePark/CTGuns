@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_VERSION "1.06"
-#define PLUGIN_PREFIX "[\x06Tango CTGuns\x01]"
+#define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
 #include <SDKTools>
