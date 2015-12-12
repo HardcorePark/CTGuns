@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.23"
+#define PLUGIN_VERSION "1.24"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -73,7 +73,7 @@ public OnPluginStart()
 	HookEvent("round_end", Event_End);
 	HookEvent("player_spawn", Event_Spawn);
 	RegConsoleCmd("sm_ctguns", Command_ctguns);
-	CreateTimer(120.0, advertisement, TIMER_REPEAT);
+	CreateTimer(120.0, advertisement, _, TIMER_REPEAT);
 }
 
 public Action advertisement(Handle timer)
@@ -84,7 +84,7 @@ public Action advertisement(Handle timer)
 public Action Event_Start(Handle event, char[] name, bool dontBroadcast)
 {
 	g_Enabled = true;
-	g_RoundTimer = CreateTimer(30.0, Timer_Round, _, TIMER_REPEAT);
+	g_RoundTimer = CreateTimer(30.0, Timer_Round);
 }
 
 public Action Event_End(Handle event, char[] name, bool dontBroadcast)
