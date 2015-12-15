@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.26"
+#define PLUGIN_VERSION "1.30"
 #define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
 
 #include <sourcemod>
@@ -18,13 +18,30 @@ public Plugin myinfo =
 /*ENUMS*/
 enum MainSubMenu
 {
-	pistols,
 	rifles,
-	snipers,
 	smgs,
-	shotguns,
-	mgs,
-};
+	snipers,
+	pistols,
+}
+enum SmgsSubMenu
+{
+	ump45,
+	p90,
+	mp7,
+	mp9,
+	ppbizon,
+	mac10,
+}
+enum RiflesSubMenu
+{
+	ak47,
+	aug,
+	famas,
+	galil,
+	sg553,
+	m4a1,
+	m4a4,
+}
 enum PistolsSubMenu
 {
 	deagle,
@@ -37,17 +54,8 @@ enum PistolsSubMenu
 	p2000,
 	dualberettas,
 	k8revolver,	
-};
-enum RiflesSubMenu
-{
-	ak47,
-	aug,
-	famas,
-	galil,
-	sg553,
-	m4a1,
-	m4a4,
 }
+
 enum SnipersSubMenu
 {
 	awp,
@@ -166,9 +174,10 @@ public MainMenu(client)
 {
 	Handle l_menu = CreateMenu(CTGunsMenuHandle, MENU_ACTIONS_ALL);
 	SetMenuTitle(l_menu, "Tango CT Guns");
-	AddMenuItem(l_menu, "0", "Pistols");
-	AddMenuItem(l_menu, "1", "Rifles");
+	AddMenuItem(l_menu, "0", "Rifles");
+	AddMenuItem(l_menu, "1", "SMGs");
 	AddMenuItem(l_menu, "2", "Snipers");
+	AddMenuItem(l_menu, "3", "Pistols");
 	DisplayMenu(l_menu, client, 0);
 }
 
@@ -214,6 +223,19 @@ public SnipersMenu(client)
 	DisplayMenu(snipers_menu, client, 0);
 }
 
+public SmgsMenu(client)
+{
+	Handle smgs_menu = CreateMenu(SmgsMenuHandle, MENU_ACTIONS_ALL);
+	SetMenuTitle(smgs_menu, "CT Guns - SMGs");
+	AddMenuItem(smgs_menu, "0", "UMP-45");
+	AddMenuItem(smgs_menu, "1", "P90");
+	AddMenuItem(smgs_menu, "2", "MP7");
+	AddMenuItem(smgs_menu, "3", "MP9");
+	AddMenuItem(smgs_menu, "4", "PP-Bizon");
+	AddMenuItem(smgs_menu, "5", "MAC-10");
+	DisplayMenu(smgs_menu, client, 0);
+}
+
 /* MENU HANDLES */
 public CTGunsMenuHandle(Handle menu, MenuAction action, client, option)
 {
@@ -227,19 +249,237 @@ public CTGunsMenuHandle(Handle menu, MenuAction action, client, option)
 		
 		switch(MainSubMenu:StringToInt(lOption))
 		{
-			case pistols:
-			{
-				PistolsMenu(client);
-			}
 			case rifles:
 			{
 				RiflesMenu(client);
+			}
+			case smgs:
+			{
+				SmgsMenu(client);
 			}
 			case snipers:
 			{
 				SnipersMenu(client);
 			}
+			case pistols:
+			{
+				PistolsMenu(client);
+			}
 		}	
+	}
+}
+
+public RiflesMenuHandle(Handle menu, MenuAction action, client, option)
+{
+	if(action == MenuAction_Select && IsValidPlayer(client))
+	{
+		char lOption[32];
+		if(!GetMenuItem(menu, option, lOption, sizeof(lOption)))
+		{
+			PrintToChat(client, "%s Invalid Option", PLUGIN_PREFIX);
+		}
+		
+		int weaponI = GetPlayerWeaponSlot(client, 0);
+		if (weaponI != -1)
+		{
+			RemovePlayerItem(client, weaponI);
+			RemoveEdict(weaponI);
+		}
+		
+		char weaponName[512];
+		g_PickedPrimary[client] = true;
+		
+		switch(PistolsSubMenu:StringToInt(lOption))
+		{
+			case ak47:
+			{
+				PrintToChat(client, "%s You've been given a: \x07AK-47", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_ak47";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case aug:
+			{
+				PrintToChat(client, "%s You've been given a: \x07AUG", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_aug";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case famas:
+			{
+				PrintToChat(client, "%s You've been given a: \x07Famas", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_famas";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case galil:
+			{
+				PrintToChat(client, "%s You've been given a: \x07Galil", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_galilar";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case sg553:
+			{
+				PrintToChat(client, "%s You've been given a: \x07SG553", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_sg556";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case m4a1:
+			{
+				PrintToChat(client, "%s You've been given a: \x07M4a1 - Silenced", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_m4a1_silencer";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case m4a4:
+			{
+				PrintToChat(client, "%s You've been given a: \x07M4a4", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_m4a1";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+		}
+	}
+}
+
+public SmgsMenuHandle(Handle menu, MenuAction action, client, option)
+{
+	if(action == MenuAction_Select && IsValidPlayer(client))
+	{
+		char lOption[32];
+		if(!GetMenuItem(menu, option, lOption, sizeof(lOption)))
+		{
+			PrintToChat(client, "%s Invalid Option", PLUGIN_PREFIX);
+		}
+		
+		int weaponI = GetPlayerWeaponSlot(client, 0);
+		if (weaponI != -1)
+		{
+			RemovePlayerItem(client, weaponI);
+			RemoveEdict(weaponI);
+		}
+		
+		char weaponName[512];
+		g_PickedPrimary[client] = true;
+		
+		switch(SmgsSubMenu:StringToInt(lOption))
+		{
+			case ump45:
+			{
+				PrintToChat(client, "%s You've been given a: \x07UMP-45", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_ump45";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case p90:
+			{
+				PrintToChat(client, "%s You've been given a: \x07P90", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_p90";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case mp7:
+			{
+				PrintToChat(client, "%s You've been given a: \x07MP7", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_mp7";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case mp9:
+			{
+				PrintToChat(client, "%s You've been given a: \x07MP9", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_mp9";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case ppbizon:
+			{
+				PrintToChat(client, "%s You've been given a: \x07PP-Bizon", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_bizon";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case mac10:
+			{
+				PrintToChat(client, "%s You've been given a: \x07MAC-10", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_mac10";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+		}
+	}
+}
+
+public SnipersMenuHandle(Handle menu, MenuAction action, client, option)
+{
+	if(action == MenuAction_Select && IsValidPlayer(client))
+	{
+		char lOption[32];
+		if(!GetMenuItem(menu, option, lOption, sizeof(lOption)))
+		{
+			PrintToChat(client, "%s Invalid Option", PLUGIN_PREFIX);
+		}
+		
+		int weaponI = GetPlayerWeaponSlot(client, 0);
+		if (weaponI != -1)
+		{
+			RemovePlayerItem(client, weaponI);
+			RemoveEdict(weaponI);
+		}
+		
+		char weaponName[512];
+		g_PickedPrimary[client] = true;
+		
+		switch(SnipersSubMenu:StringToInt(lOption))
+		{
+			case awp:
+			{
+				PrintToChat(client, "%s You've been given a: \x07AWP", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_awp";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case g3sg1:
+			{
+				PrintToChat(client, "%s You've been given a: \x07G3SG1", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_g3sg1";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case ssg08:
+			{
+				PrintToChat(client, "%s You've been given a: \x07SSG 08", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_ssg08";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+			case scar20:
+			{
+				PrintToChat(client, "%s You've been given a: \x07SCAR-20", PLUGIN_PREFIX);
+				
+				weaponName = "weapon_scar20";
+				GivePlayerItem(client, weaponName, 0);
+				g_PrimaryWeapon[client] = weaponName;
+			}
+		}
 	}
 }
 
@@ -344,146 +584,6 @@ public PistolsMenuHandle(Handle menu, MenuAction action, client, option)
 				weaponName = "weapon_revolver";
 				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
-			}
-		}
-	}
-}
-
-public RiflesMenuHandle(Handle menu, MenuAction action, client, option)
-{
-	if(action == MenuAction_Select && IsValidPlayer(client))
-	{
-		char lOption[32];
-		if(!GetMenuItem(menu, option, lOption, sizeof(lOption)))
-		{
-			PrintToChat(client, "%s Invalid Option", PLUGIN_PREFIX);
-		}
-		
-		int weaponI = GetPlayerWeaponSlot(client, 0);
-		if (weaponI != -1)
-		{
-			RemovePlayerItem(client, weaponI);
-			RemoveEdict(weaponI);
-		}
-		
-		char weaponName[512];
-		g_PickedPrimary[client] = true;
-		
-		switch(PistolsSubMenu:StringToInt(lOption))
-		{
-			case ak47:
-			{
-				PrintToChat(client, "%s You've been given a: \x07AK-47", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_ak47";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case aug:
-			{
-				PrintToChat(client, "%s You've been given a: \x07AUG", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_aug";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case famas:
-			{
-				PrintToChat(client, "%s You've been given a: \x07Famas", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_famas";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case galil:
-			{
-				PrintToChat(client, "%s You've been given a: \x07Galil", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_galilar";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case sg553:
-			{
-				PrintToChat(client, "%s You've been given a: \x07SG553", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_sg556";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case m4a1:
-			{
-				PrintToChat(client, "%s You've been given a: \x07M4a1 - Silenced", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_m4a1_silencer";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case m4a4:
-			{
-				PrintToChat(client, "%s You've been given a: \x07M4a4", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_m4a1";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-		}
-	}
-}
-
-public SnipersMenuHandle(Handle menu, MenuAction action, client, option)
-{
-	if(action == MenuAction_Select && IsValidPlayer(client))
-	{
-		char lOption[32];
-		if(!GetMenuItem(menu, option, lOption, sizeof(lOption)))
-		{
-			PrintToChat(client, "%s Invalid Option", PLUGIN_PREFIX);
-		}
-		
-		int weaponI = GetPlayerWeaponSlot(client, 0);
-		if (weaponI != -1)
-		{
-			RemovePlayerItem(client, weaponI);
-			RemoveEdict(weaponI);
-		}
-		
-		char weaponName[512];
-		g_PickedPrimary[client] = true;
-		
-		switch(SnipersSubMenu:StringToInt(lOption))
-		{
-			case awp:
-			{
-				PrintToChat(client, "%s You've been given a: \x07AWP", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_awp";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case g3sg1:
-			{
-				PrintToChat(client, "%s You've been given a: \x07G3SG1", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_g3sg1";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case ssg08:
-			{
-				PrintToChat(client, "%s You've been given a: \x07SSG 08", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_ssg08";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
-			}
-			case scar20:
-			{
-				PrintToChat(client, "%s You've been given a: \x07SCAR-20", PLUGIN_PREFIX);
-				
-				weaponName = "weapon_scar20";
-				GivePlayerItem(client, weaponName, 0);
-				g_PrimaryWeapon[client] = weaponName;
 			}
 		}
 	}
