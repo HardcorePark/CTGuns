@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.30"
-#define PLUGIN_PREFIX "[\x06Tango CT-Guns\x01]"
+#define PLUGIN_VERSION "1.32"
+#define PLUGIN_PREFIX "[\x06CT-Guns\x01]"
 
 #include <sourcemod>
 #include <SDKTools>
@@ -114,33 +114,40 @@ public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
 	int clientTeam = GetClientTeam(client);
 	if(clientTeam == 3)
 	{
-		if(g_PickedPrimary[client] == true)
+		CreateTimer(0.1, giveguns, client);
+	}	
+}
+
+public Action giveguns(Handle timer, any client)
+{
+	if(g_PickedPrimary[client] == true)
+	{
+		int weaponI = GetPlayerWeaponSlot(client, 0);
+		if (weaponI != -1)
 		{
-			int weaponI = GetPlayerWeaponSlot(client, 0);
-			if (weaponI != -1)
-			{
-				RemovePlayerItem(client, weaponI);
-				RemoveEdict(weaponI);
-			}
-			
-			GivePlayerItem(client, g_PrimaryWeapon[client], 0);
-		} else {
-			PrintToChat(client, "%s No Primary Picked! Use !ctguns", PLUGIN_PREFIX);
+			RemovePlayerItem(client, weaponI);
+			RemoveEdict(weaponI);
 		}
 		
-		if(g_PickedSecondary[client] == true)
+		GivePlayerItem(client, g_PrimaryWeapon[client], 0);
+		
+	} else {
+		PrintToChat(client, "%s No Primary Picked! Use !ctguns", PLUGIN_PREFIX);
+	}
+	
+	if(g_PickedSecondary[client] == true)
+	{
+		int weaponI = GetPlayerWeaponSlot(client, 1);
+		if (weaponI != -1)
 		{
-			int weaponI = GetPlayerWeaponSlot(client, 1);
-			if (weaponI != -1)
-			{
-				RemovePlayerItem(client, weaponI);
-				RemoveEdict(weaponI);
-			}
-			
-			GivePlayerItem(client, g_SecondaryWeapon[client], 0);		
-		} else {
-			PrintToChat(client, "%s No Secondary Picked! Use !ctguns", PLUGIN_PREFIX);
-		}	
+			RemovePlayerItem(client, weaponI);
+			RemoveEdict(weaponI);
+		}
+		
+		GivePlayerItem(client, g_SecondaryWeapon[client], 0);
+		
+	} else {
+		PrintToChat(client, "%s No Secondary Picked! Use !ctguns", PLUGIN_PREFIX);
 	}	
 }
 
