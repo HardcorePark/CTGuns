@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.32"
+#define PLUGIN_VERSION "1.40"
 #define PLUGIN_PREFIX "[\x06CT-Guns\x01]"
 
 #include <sourcemod>
@@ -65,20 +65,16 @@ enum SnipersSubMenu
 }
 
 /* GLOBALS */
-Handle g_RoundTimer = INVALID_HANDLE;
-bool g_Enabled = true;
-
 char g_PrimaryWeapon[MAXPLAYERS + 1][512];
 char g_SecondaryWeapon[MAXPLAYERS + 1][512];
 
 bool g_PickedPrimary[MAXPLAYERS + 1];
 bool g_PickedSecondary[MAXPLAYERS + 1];
+bool g_GiveWeapons[MAXPLAYERS + 1];
 
 /* MAINS */
 public OnPluginStart()
 {
-	HookEvent("round_start", Event_Start);
-	HookEvent("round_end", Event_End);
 	HookEvent("player_spawn", Event_Spawn);
 	RegConsoleCmd("sm_ctguns", Command_ctguns);
 	CreateTimer(120.0, advertisement, _, TIMER_REPEAT);
@@ -87,25 +83,6 @@ public OnPluginStart()
 public Action advertisement(Handle timer)
 {
 	PrintToChatAll("%s Type \x07!ctguns \x01to select your gun loadouts!", PLUGIN_PREFIX);
-}
-
-public Action Event_Start(Handle event, char[] name, bool dontBroadcast)
-{
-	g_Enabled = true;
-	g_RoundTimer = CreateTimer(30.0, Timer_Round);
-}
-
-public Action Event_End(Handle event, char[] name, bool dontBroadcast)
-{
-	g_Enabled = false;
-	
-	if (g_RoundTimer != INVALID_HANDLE)
-	{
-		if(CloseHandle(g_RoundTimer))
-		{
-			g_RoundTimer = INVALID_HANDLE;
-		}
-	}	
 }
 
 public Action Event_Spawn(Handle event, char[] name, bool dontBroadcast)
@@ -155,19 +132,15 @@ public Action Command_ctguns(client, args)
 {	
 	if (!IsPlayerAlive(client))
 	{
-		PrintToChat(client, "%s You must be alive!", PLUGIN_PREFIX);
-		return Plugin_Handled;
+		g_GiveWeapons[client] = false;
+		PrintToChat(client, "%s You'll be given your weapons when you spawn in!", PLUGIN_PREFIX);
+	} else {
+		g_GiveWeapons[client] = true;
 	}
 	
 	if (GetClientTeam(client) != 3)
 	{
 		PrintToChat(client, "%s You are on the wrong team!", PLUGIN_PREFIX);
-		return Plugin_Handled;
-	}
-	
-	if (g_Enabled == false)
-	{
-		PrintToChat(client, "%s You can only use this command for the first 30 seconds!", PLUGIN_PREFIX);
 		return Plugin_Handled;
 	}
 	
@@ -303,56 +276,70 @@ public RiflesMenuHandle(Handle menu, MenuAction action, client, option)
 				PrintToChat(client, "%s You've been given a: \x07AK-47", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_ak47";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case aug:
 			{
 				PrintToChat(client, "%s You've been given a: \x07AUG", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_aug";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case famas:
 			{
 				PrintToChat(client, "%s You've been given a: \x07Famas", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_famas";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case galil:
 			{
 				PrintToChat(client, "%s You've been given a: \x07Galil", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_galilar";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case sg553:
 			{
 				PrintToChat(client, "%s You've been given a: \x07SG553", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_sg556";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case m4a1:
 			{
 				PrintToChat(client, "%s You've been given a: \x07M4a1 - Silenced", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_m4a1_silencer";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case m4a4:
 			{
 				PrintToChat(client, "%s You've been given a: \x07M4a4", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_m4a1";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 		}
 	}
@@ -385,48 +372,60 @@ public SmgsMenuHandle(Handle menu, MenuAction action, client, option)
 				PrintToChat(client, "%s You've been given a: \x07UMP-45", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_ump45";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case p90:
 			{
 				PrintToChat(client, "%s You've been given a: \x07P90", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_p90";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case mp7:
 			{
 				PrintToChat(client, "%s You've been given a: \x07MP7", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_mp7";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case mp9:
 			{
 				PrintToChat(client, "%s You've been given a: \x07MP9", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_mp9";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case ppbizon:
 			{
 				PrintToChat(client, "%s You've been given a: \x07PP-Bizon", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_bizon";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case mac10:
 			{
 				PrintToChat(client, "%s You've been given a: \x07MAC-10", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_mac10";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 		}
 	}
@@ -459,32 +458,40 @@ public SnipersMenuHandle(Handle menu, MenuAction action, client, option)
 				PrintToChat(client, "%s You've been given a: \x07AWP", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_awp";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case g3sg1:
 			{
 				PrintToChat(client, "%s You've been given a: \x07G3SG1", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_g3sg1";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case ssg08:
 			{
 				PrintToChat(client, "%s You've been given a: \x07SSG 08", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_ssg08";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case scar20:
 			{
 				PrintToChat(client, "%s You've been given a: \x07SCAR-20", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_scar20";
-				GivePlayerItem(client, weaponName, 0);
 				g_PrimaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 		}
 	}
@@ -517,90 +524,103 @@ public PistolsMenuHandle(Handle menu, MenuAction action, client, option)
 				PrintToChat(client, "%s You've been given a: \x07Deagle", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_deagle";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case cz75:
 			{
 				PrintToChat(client, "%s You've been given a: \x07CZ75", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_cz75a";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case tec9:
 			{
 				PrintToChat(client, "%s You've been given a: \x07Tec-9", PLUGIN_PREFIX);
 
 				weaponName = "weapon_tec9";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case fiveseven:
 			{
 				PrintToChat(client, "%s You've been given a: \x07Five-SeveN", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_fiveseven";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case usps:
 			{
 				PrintToChat(client, "%s You've been given a: \x07USP-S", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_usp_silencer";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case glock18:
 			{
 				PrintToChat(client, "%s You've been given a: \x07Glock-18", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_glock";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case p250:
 			{
 				PrintToChat(client, "%s You've been given a: \x07P250", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_p250";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case p2000:
 			{
 				PrintToChat(client, "%s You've been given a: \x07P2000", PLUGIN_PREFIX);
 
 				weaponName = "weapon_hkp2000";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case dualberettas:
 			{
 				PrintToChat(client, "%s You've been given: \x07Dual Berettas", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_elite";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 			case k8revolver:
 			{
 				PrintToChat(client, "%s You've been given a: \x07R8 Revolver", PLUGIN_PREFIX);
 				
 				weaponName = "weapon_revolver";
-				GivePlayerItem(client, weaponName, 0);
 				g_SecondaryWeapon[client] = weaponName;
+				
+				if (g_GiveWeapons[client])
+					GivePlayerItem(client, weaponName, 0);
 			}
 		}
 	}
-}
-
-/* TIMERS */
-public Action Timer_Round(Handle timer)
-{
-	g_Enabled = false;
-	g_RoundTimer = INVALID_HANDLE;
 }
 
 /* FUNCTIONS */
