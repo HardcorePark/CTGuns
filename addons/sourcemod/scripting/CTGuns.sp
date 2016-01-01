@@ -1,6 +1,6 @@
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.41"
+#define PLUGIN_VERSION "1.42"
 #define PLUGIN_PREFIX "[\x06CT-Guns\x01]"
 
 #include <sourcemod>
@@ -287,7 +287,7 @@ public RiflesMenuHandle(Handle menu, MenuAction action, client, option)
 		char weaponName[512];
 		g_PickedPrimary[client] = true;
 		
-		switch(PistolsSubMenu:StringToInt(lOption))
+		switch(RiflesSubMenu:StringToInt(lOption))
 		{
 			case ak47:
 			{
