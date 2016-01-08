@@ -1,6 +1,6 @@
 #pragma semicolon 1
  
-#define PLUGIN_VERSION "1.50"
+#define PLUGIN_VERSION "1.51"
 #define PLUGIN_PREFIX "[\x06CT-Guns\x01]"
  
 #include <sourcemod>
@@ -27,7 +27,7 @@ enum MainSubMenu
 }
  
 char g_Smgs[][WEAPONARRAYSIZE] = {"ump45", "p90", "mp7", "mp9", "ppbizon", "mac10"};
-char g_Rifles[][WEAPONARRAYSIZE] = {"ak47", "aug", "famas", "galil", "sg553", "m4a1", "m4a4"};
+char g_Rifles[][WEAPONARRAYSIZE] = {"ak47", "aug", "famas", "galilar", "sg553", "m4a1", "m4a4"};
 char g_Pistols[][WEAPONARRAYSIZE] = {"deagle", "cz75a", "tec9", "fiveseven", "usp_silencer", "glock", "p250", "hkp2000", "elite", "revolver"};
 char g_Snipers[][WEAPONARRAYSIZE] = {"awp", "g3sg1", "ssg08", "scar20"};
  
